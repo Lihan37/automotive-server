@@ -46,6 +46,26 @@ async function run() {
       res.send(result);
     })
 
+    app.put('/cars/:id', async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const options = {upsert : true};
+      const updatedCar = req.body;
+      const car = {
+        $set: {
+          name: updatedCar.name, 
+          brandname: updatedCar.brandname, 
+          price: updatedCar.price, 
+          image: updatedCar.image, 
+          cartype: updatedCar.cartype, 
+          shortdes: updatedCar.shortdes, 
+          rating: updatedCar.rating,
+        }
+      }
+
+      const result = await carsCollection.updateOne(filter, car, options);
+      res.send(result); 
+    })
 
 
     app.get('/cars', async (req, res) => {
@@ -73,9 +93,24 @@ async function run() {
         console.log(carDetails);
         const result = await cartCollection.insertOne(carDetails);
         res.send(result);
-      
-      
     });
+
+    app.delete('/cart/:id', async (req, res) => {
+      const itemId = req.params.id;
+      try {
+          const query = { _id: new ObjectId(itemId) };
+          const result = await cartCollection.deleteOne(query);
+          if (result.deletedCount === 1) {
+              res.status(200).json({ message: 'Item deleted successfully' });
+          } else {
+              res.status(404).json({ message: 'Item not found' });
+          }
+      } catch (error) {
+          console.error('Error deleting item:', error);
+          res.status(500).json({ message: 'Internal server error' });
+      }
+  });
+  
 
     // ...
 
